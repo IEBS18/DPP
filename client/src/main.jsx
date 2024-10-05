@@ -16,6 +16,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from '../src/components/Home';
 import Visualize from '../src/components/Visualize';
 import Predict from '../src/components/Predict';
+import Authenticate from '../src/pages/Authenticate';
 import './index.css';
 
 createRoot(document.getElementById('root')).render(
@@ -25,6 +26,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="/" element={<Home />} />
         <Route path="/visualize" element={<Visualize />} />
         <Route path="/predict" element={<Predict />} />
+        <Route path="/auth" element={<Authenticate />} />
       </Routes>
     </Router>
   </StrictMode>
