@@ -1,0 +1,13 @@
+numpy
+pandas
+scikit-learn
+torch
+transformers
+openai
+faiss-cpu
+sentence-transformers
+flask
+python-dotenv
+matplotlib
+seaborn
+sentencepiece
