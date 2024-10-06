@@ -201,7 +201,16 @@
 
 import { useState } from "react";
 import Select from "react-select";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 import drugNamesData from "@/data/drug_names.json"; // Adjust the path to your JSON file
 import Navbar from "./Navbar";
 import { Button } from "@/components/ui/button"; // Import Button from ShadCN
@@ -229,15 +238,15 @@ export default function Visualize() {
     }
 
     setLoading(true);
-    setHistoricalData([]);  // Clear previous data
+    setHistoricalData([]); // Clear previous data
     setProjectedData([]);
     setPatentExpiryYear(null);
-    
+
     try {
-      const response = await fetch('http://localhost:5000/visualize', {
-        method: 'POST',
+      const response = await fetch("http://localhost:5000/visualize", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ drug_name: selectedDrug.value }),
       });
@@ -251,8 +260,8 @@ export default function Visualize() {
         alert(data.error);
       }
     } catch (error) {
-      console.error('Error visualizing drug:', error);
-      alert('Failed to visualize drug.');
+      console.error("Error visualizing drug:", error);
+      alert("Failed to visualize drug.");
     } finally {
       setLoading(false);
     }
@@ -280,8 +289,12 @@ export default function Visualize() {
             </p>
 
             {/* Visualize Button */}
-            <Button onClick={handleVisualize} className="w-full py-4 text-lg" disabled={loading}>
-              {loading ? 'Visualizing...' : 'Visualize'}
+            <Button
+              onClick={handleVisualize}
+              className="w-full py-4 text-lg"
+              disabled={loading}
+            >
+              {loading ? "Visualizing..." : "Visualize"}
             </Button>
 
             {/* Display the chart if data is available */}
@@ -294,9 +307,25 @@ export default function Visualize() {
                   <Tooltip />
                   <Legend />
                   {/* Historical Data */}
-                  <Line type="monotone" data={historicalData} dataKey="cost" stroke="#8884d8" name="Historical Costs" activeDot={{ r: 8 }} />
+                  <Line
+                    type="monotone"
+                    data={historicalData}
+                    dataKey="cost"
+                    stroke="#1f77b4" // Darker blue color
+                    strokeWidth={3} // Increase the width for a bolder line
+                    name="Historical Costs"
+                    activeDot={{ r: 8 }}
+                  />
                   {/* Projected Data */}
-                  <Line type="monotone" data={projectedData} dataKey="cost" stroke="#82ca9d" name="Projected Costs" strokeDasharray="5 5" />
+                  <Line
+                    type="monotone"
+                    data={projectedData}
+                    dataKey="cost"
+                    stroke="#ff7f0e" // Darker orange color
+                    strokeWidth={3} // Increase the width for a bolder line
+                    strokeDasharray="5 5"
+                    name="Projected Costs"
+                  />
                 </LineChart>
               </ResponsiveContainer>
             )}
