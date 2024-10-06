@@ -243,7 +243,7 @@ export default function Visualize() {
     setPatentExpiryYear(null);
 
     try {
-      const response = await fetch("http://184.72.153.100:5000/visualize", {
+      const response = await fetch("http://44.202.59.255:5000/visualize", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

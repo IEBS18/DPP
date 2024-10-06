@@ -267,7 +267,7 @@ export default function Predict() {
     }
 
     try {
-      const response = await fetch('http://184.72.153.100:5000/predict', {
+      const response = await fetch('http://44.202.59.255:5000/predict', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
