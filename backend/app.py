@@ -93,7 +93,7 @@
 #     app.run(debug=True)
 
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import uuid
 import json
@@ -107,6 +107,7 @@ from models.rag import RAG
 from models.response_aggregator import ResponseAggregator
 from models.drug_visualizer import DrugVisualizer  # For visualization
 from models.new_drug_price import NewDrugPricePredictor  # For new drug price prediction
+from models.rag import RAG
 import pandas as pd
 
 app = Flask(__name__)
@@ -204,6 +205,22 @@ def login():
 #         return jsonify({'error': str(e)}), 500
 
 
+# @app.route('/visualize', methods=['POST'])
+# def visualize():
+#     data = request.get_json()
+#     drug_name = data.get('drug_name')
+
+#     if not drug_name:
+#         return jsonify({'error': 'Drug name is required'}), 400
+
+#     try:
+#         # Use the drug visualizer to retrieve the requested drug data
+#         visualization_result = drug_visualizer.visualize_drug_data(drug_name)
+#         return jsonify({'message': f"Visualization for {drug_name} completed", 'data': visualization_result}), 200
+#     except ValueError as e:
+#         return jsonify({'error': str(e)}), 404
+#     except Exception as e:
+#         return jsonify({'error': str(e)}), 500
 @app.route('/visualize', methods=['POST'])
 def visualize():
     data = request.get_json()
@@ -213,9 +230,11 @@ def visualize():
         return jsonify({'error': 'Drug name is required'}), 400
 
     try:
-        # Use the drug visualizer to retrieve the requested drug data
-        visualization_result = drug_visualizer.visualize_drug_data(drug_name)
-        return jsonify({'message': f"Visualization for {drug_name} completed", 'data': visualization_result}), 200
+        # Use the drug visualizer to generate the graph
+        img = drug_visualizer.visualize_drug_data(drug_name)
+
+        # Return the image as a response
+        return send_file(img, mimetype='image/png')
     except ValueError as e:
         return jsonify({'error': str(e)}), 404
     except Exception as e:
@@ -306,11 +325,30 @@ def predict():
     # Call the ML model to predict the price of the new drug
     try:
         new_drug_predictor = NewDrugPricePredictor(preprocessed_data, rag, sub_llm)
-        prediction_result = new_drug_predictor.predict_new_drug_price(data)
+        disease_keywords = data['disease'].split()
+        disease_drugs = new_drug_predictor.df[new_drug_predictor.df['Indication'].apply(
+            lambda x: all(keyword.lower() in str(x).lower() for keyword in disease_keywords)
+        )].copy()
+        print(data)
+        adjusted_cost = new_drug_predictor.predict_new_drug_price(data)
+        # predicted_price = rag.get_current_price(data['Drug_Name'])
+        # print("adjusted cost: ",predicted_price)
+
+        # Store the image temporarily if needed for retrieval
+        img_path = f"static/comparator_drug_prices_{data['Drug_Name']}.png"  # Adjust path as necessary
+        img = new_drug_predictor.visualize_comparator_drug_prices(disease_drugs, adjusted_cost, data['Drug_Name'])
+        # img_path = f"{base_path}/comparator_drug_prices_{drug_name}.png"
+        n = 1
+        while os.path.exists(img_path):
+            img_path = f"static/comparator_drug_prices_{data['Drug_Name']}_{n}.png"
+            n += 1
+  
+        with open(img_path, 'wb') as f:
+            f.write(img.getvalue())
 
         return jsonify({
-            'comparator_prices': prediction_result['comparator_prices'],
-            'predicted_price': f"₹{prediction_result['predicted_price']:.2f}"
+            'predicted_price': f"€{adjusted_cost:.2f}",
+            'image_url': f"/static/{img_path.split('/')[-1]}"  # Return the URL of the image
         }), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500

@@ -39,7 +39,7 @@
 //         },
 //         body: JSON.stringify(drugData),
 //       });
-      
+
 //       const data = await response.json();
 //       if (response.ok) {
 //         setPredictedCost(data.predicted_cost);
@@ -154,7 +154,7 @@
 //         },
 //         body: JSON.stringify(drugData),
 //       });
-      
+
 //       const data = await response.json();
 //       if (response.ok) {
 //         setPredictedCost(data.predicted_cost);
@@ -244,6 +244,8 @@ export default function Predict() {
   const [predictedCost, setPredictedCost] = useState('');
   const [comparatorData, setComparatorData] = useState([]);  // Store comparator drug data for the chart
   const [loading, setLoading] = useState(false);
+  const [predictedPrice, setPredictedPrice] = useState(null);
+  const [imageUrl, setImageUrl] = useState('');
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -268,20 +270,24 @@ export default function Predict() {
 
     try {
       const response = await fetch('http://44.202.59.255:5000/predict', {
+      // const response = await fetch('http://localhost:5000/predict', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(drugData),
       });
-      
+
       const data = await response.json();
+      console.log(data);
       if (response.ok) {
-        setPredictedCost(data.predicted_price);
-        setComparatorData([
-          ...data.comparator_prices.map((d) => ({ name: d.name, price: d.price })),
-          { name: "Predicted New Drug", price: parseFloat(data.predicted_price.replace('₹', '').replace(',', '')) }
-        ]);
+        setPredictedPrice(data.predicted_price);
+        setImageUrl(`http://44.202.59.255:5000/${data.image_url}`);
+        // setPredictedCost(data.predicted_price);
+        // setComparatorData([
+        //   ...data.comparator_prices.map((d) => ({ name: d.name, price: d.price })),
+        //   { name: "Predicted New Drug", price: parseFloat(data.predicted_price.replace('₹', '').replace(',', '')) }
+        // ]);
       } else {
         alert(data.error);
       }
@@ -309,8 +315,8 @@ export default function Predict() {
                   value={drugData[field]}
                   onChange={handleInputChange}
                   type={field === 'mortality' || field === 'morbidity' || field === 'quality_of_life' ||
-                        field === 'Total_Adverse_Events' || field === 'Adverse_Event_Discontinuation' ||
-                        field === 'Serious_Adverse_Events' ? 'number' : 'text'}  // Use 'number' type for numeric fields
+                    field === 'Total_Adverse_Events' || field === 'Adverse_Event_Discontinuation' ||
+                    field === 'Serious_Adverse_Events' ? 'number' : 'text'}  // Use 'number' type for numeric fields
                 />
               </div>
             ))}
@@ -320,15 +326,27 @@ export default function Predict() {
           </Button>
 
           {/* Display the predicted cost */}
-          {predictedCost && (
+          {/* {predictedCost && (
             <div className="space-y-4">
               <h2 className="text-xl font-semibold">Predicted Cost for the New Drug</h2>
               <Input value={predictedCost} readOnly />
             </div>
+          )} */}
+          {predictedPrice && (
+            <div>
+              <h2>Predicted Price: {predictedPrice}</h2>
+              {imageUrl && (
+                <div>
+                  <h3>Price Comparison Chart:</h3>
+                  <img src={imageUrl} alt="Comparator Drug Prices" />
+                </div>
+              )}
+            </div>
           )}
 
           {/* Display the comparator drug prices chart */}
-          {comparatorData.length > 0 && (
+          
+          {/* {comparatorData.length > 0 && (
             <div className="space-y-4">
               <h2 className="text-xl font-semibold">Comparative Drug Costs</h2>
               <ResponsiveContainer width="100%" height={400}>
@@ -342,7 +360,7 @@ export default function Predict() {
                 </BarChart>
               </ResponsiveContainer>
             </div>
-          )}
+          )} */}
         </div>
       </main>
     </div>

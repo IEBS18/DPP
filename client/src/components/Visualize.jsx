@@ -226,6 +226,7 @@ export default function Visualize() {
   const [historicalData, setHistoricalData] = useState([]);
   const [projectedData, setProjectedData] = useState([]);
   const [patentExpiryYear, setPatentExpiryYear] = useState(null);
+  const [graphUrl, setGraphUrl] = useState('');
 
   const handleDrugChange = (selectedOption) => {
     setSelectedDrug(selectedOption);
@@ -244,6 +245,7 @@ export default function Visualize() {
 
     try {
       const response = await fetch("http://44.202.59.255:5000/visualize", {
+      // const response = await fetch("http://localhost:5000/visualize", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -251,11 +253,14 @@ export default function Visualize() {
         body: JSON.stringify({ drug_name: selectedDrug.value }),
       });
 
-      const data = await response.json();
+      const blob = await response.blob(); // Get the response as a blob
+
       if (response.ok) {
-        setHistoricalData(data.data.historical_data);
-        setProjectedData(data.data.projected_data);
-        setPatentExpiryYear(data.data.patent_expiry_year);
+        // setHistoricalData(data.data.historical_data);
+        // setProjectedData(data.data.projected_data);
+        // setPatentExpiryYear(data.data.patent_expiry_year);
+        const imageUrl = URL.createObjectURL(blob); // Create a URL for the image blob
+        setGraphUrl(imageUrl);
       } else {
         alert(data.error);
       }
@@ -296,9 +301,14 @@ export default function Visualize() {
             >
               {loading ? "Visualizing..." : "Visualize"}
             </Button>
-
+            {graphUrl && (
+              <div>
+                {/* <h3>Graph for {drugName}:</h3> */}
+                <img src={graphUrl} alt={`Graph for ${selectedDrug}`} />
+              </div>
+            )}
             {/* Display the chart if data is available */}
-            {(historicalData.length > 0 || projectedData.length > 0) && (
+            {/* {(historicalData.length > 0 || projectedData.length > 0) && (
               <ResponsiveContainer width="100%" height={400}>
                 <LineChart>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -307,7 +317,7 @@ export default function Visualize() {
                   <Tooltip />
                   <Legend />
                   {/* Historical Data */}
-                  <Line
+            {/* <Line
                     type="monotone"
                     data={historicalData}
                     dataKey="cost"
@@ -315,9 +325,9 @@ export default function Visualize() {
                     strokeWidth={3} // Increase the width for a bolder line
                     name="Historical Costs"
                     activeDot={{ r: 8 }}
-                  />
-                  {/* Projected Data */}
-                  <Line
+                  /> */}
+            {/* Projected Data */}
+            {/* <Line
                     type="monotone"
                     data={projectedData}
                     dataKey="cost"
@@ -328,7 +338,7 @@ export default function Visualize() {
                   />
                 </LineChart>
               </ResponsiveContainer>
-            )}
+            )} */}
           </div>
         </div>
       </main>
