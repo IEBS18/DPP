@@ -11,3 +11,4 @@ python-dotenv
 matplotlib
 seaborn
 sentencepiece
+flask-cors
